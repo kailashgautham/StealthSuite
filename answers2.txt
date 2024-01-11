@@ -1,4 +1,0 @@
-answers2.txt
-a + b will return 23
-
-c returns undefined
