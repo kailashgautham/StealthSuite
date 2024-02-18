@@ -12,25 +12,29 @@ class App extends Component {
     this.state = {
       input: '',
       imageUrl: '',
-      box: []
+      boxes: []
     };
   }
 
   calculateFaceLocation = (result) => {
-    const clarifaiFace = result.outputs[0].data.regions[0].region_info.bounding_box;
-    const image = document.getElementById("inputimage");
-    const width = image.width;
-    const height = image.height;
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      rightCol: width - (clarifaiFace.right_col * width),
-      topRow: clarifaiFace.top_row * height,
-      bottomRow: height - (clarifaiFace.bottom_row * height),
-    };
+    let boxes = [];
+    result.outputs[0].data.regions.map((region) => {
+      const clarifaiFace = region.region_info.bounding_box;
+      const image = document.getElementById("inputimage");
+      const width = image.width;
+      const height = image.height;
+      boxes.push({
+        leftCol: clarifaiFace.left_col * width,
+        rightCol: width - (clarifaiFace.right_col * width),
+        topRow: clarifaiFace.top_row * height,
+        bottomRow: height - (clarifaiFace.bottom_row * height),
+      });
+    });
+    return boxes;
   }
 
-  displayFaceBox = (box) => {
-    this.setState({box: box});
+  displayFaceBox = (boxes) => {
+    this.setState({boxes: boxes});
   }
 
   onInputChange = (event) => {
@@ -38,8 +42,10 @@ class App extends Component {
   }
 
   onInputSubmit = (event) => {
+
     this.setState({imageUrl: this.state.input});
-    this.setState({box: []});
+    this.setState({boxes: []});
+
     const PAT = 'c9d4d4095a2d46b28ba9ad15149ae72b';
 
     const USER_ID = 'clarifai';
@@ -90,7 +96,7 @@ class App extends Component {
         <Logo />
         <Rank />
         <ImageLinkForm onInputChange={this.onInputChange} onInputSubmit={this.onInputSubmit} />
-        {this.state.imageUrl !== "" ? <FaceRecognition box={this.state.box} image={this.state.imageUrl}/> : <></>}
+        {this.state.imageUrl !== "" ? <FaceRecognition boxes={this.state.boxes} image={this.state.imageUrl}/> : <></>}
       </div>
     );
   }
