@@ -4,24 +4,42 @@ import Navigation from './components/Navigation/Navigation'
 import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm'
 import Rank from './components/Rank/Rank';
-
+import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 class App extends Component {
+  //state so that app can remember user value and update when it changes
   constructor(props) {
     super(props);
     this.state = {
-      input: ''
+      input: '',
+      imageUrl: '',
+      box: []
     };
   }
 
+  calculateFaceLocation = (result) => {
+    const clarifaiFace = result.outputs[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById("inputimage");
+    const width = image.width;
+    const height = image.height;
+    return {
+      leftCol: clarifaiFace.left_col * width,
+      rightCol: width - (clarifaiFace.right_col * width),
+      topRow: clarifaiFace.top_row * height,
+      bottomRow: height - (clarifaiFace.bottom_row * height),
+    };
+  }
+
+  displayFaceBox = (box) => {
+    this.setState({box: box});
+  }
+
   onInputChange = (event) => {
-    this.setState({
-      input: event.target.value
-    });
+    this.setState({input: event.target.value});
   }
 
   onInputSubmit = (event) => {
-    console.log(this.state.input);
-
+    this.setState({imageUrl: this.state.input});
+    this.setState({box: []});
     const PAT = 'c9d4d4095a2d46b28ba9ad15149ae72b';
 
     const USER_ID = 'clarifai';
@@ -52,7 +70,7 @@ class App extends Component {
     };
 
     fetch(
-      "https://api.clarifai.com/v2/users/"+
+      "https://api.clarifai.com/v2/users/" +
         USER_ID +
         "/apps/" +
         APP_ID +
@@ -62,24 +80,9 @@ class App extends Component {
       requestOptions
     )
       .then(response => response.json())
-      .then(result => {
-        const regions = result.outputs[0].data.regions;
-        regions.forEach(region => {
-          const boundingBox = region.region_info.bounding_box;
-          const topRow = boundingBox.top_row.toFixed(3);
-          const leftCol = boundingBox.left_col.toFixed(3);
-          const bottomRow = boundingBox.bottom_row.toFixed(3);
-          const rightCol = boundingBox.right_col.toFixed(3);
-          region.data.concepts.forEach(concept => {
-            const name = concept.name;
-            const value = concept.value.toFixed(4);
-            console.log(`${name}: ${value} BBox: ${topRow}, ${leftCol}, ${bottomRow}, ${rightCol}`);
-          });
-        });
-      })
+      .then(result => this.displayFaceBox(this.calculateFaceLocation(result)))
       .catch(error => console.log('error', error));
   }
-
   render() {
     return (
       <div className="App">
@@ -87,6 +90,7 @@ class App extends Component {
         <Logo />
         <Rank />
         <ImageLinkForm onInputChange={this.onInputChange} onInputSubmit={this.onInputSubmit} />
+        {this.state.imageUrl !== "" ? <FaceRecognition box={this.state.box} image={this.state.imageUrl}/> : <></>}
       </div>
     );
   }
