@@ -5,11 +5,14 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm'
 import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
+import Signin from './components/Signin/Signin';
+
 class App extends Component {
   //state so that app can remember user value and update when it changes
   constructor(props) {
     super(props);
     this.state = {
+      route: 'signin',
       input: '',
       imageUrl: '',
       boxes: []
@@ -18,7 +21,7 @@ class App extends Component {
 
   calculateFaceLocation = (result) => {
     let boxes = [];
-    result.outputs[0].data.regions.map((region) => {
+    result.outputs[0].data.regions.forEach((region) => {
       const clarifaiFace = region.region_info.bounding_box;
       const image = document.getElementById("inputimage");
       const width = image.width;
@@ -34,17 +37,17 @@ class App extends Component {
   }
 
   displayFaceBox = (boxes) => {
-    this.setState({boxes: boxes});
+    this.setState({ boxes: boxes });
   }
 
   onInputChange = (event) => {
-    this.setState({input: event.target.value});
+    this.setState({ input: event.target.value });
   }
 
   onInputSubmit = (event) => {
 
-    this.setState({imageUrl: this.state.input});
-    this.setState({boxes: []});
+    this.setState({ imageUrl: this.state.input });
+    this.setState({ boxes: [] });
 
     const PAT = 'c9d4d4095a2d46b28ba9ad15149ae72b';
 
@@ -77,12 +80,12 @@ class App extends Component {
 
     fetch(
       "https://api.clarifai.com/v2/users/" +
-        USER_ID +
-        "/apps/" +
-        APP_ID +
-        "/models/" +
-        MODEL_ID +
-        "/outputs",
+      USER_ID +
+      "/apps/" +
+      APP_ID +
+      "/models/" +
+      MODEL_ID +
+      "/outputs",
       requestOptions
     )
       .then(response => response.json())
@@ -93,13 +96,21 @@ class App extends Component {
     return (
       <div className="App">
         <Navigation />
-        <Logo />
-        <Rank />
-        <ImageLinkForm onInputChange={this.onInputChange} onInputSubmit={this.onInputSubmit} />
-        {this.state.imageUrl !== "" ? <FaceRecognition boxes={this.state.boxes} image={this.state.imageUrl}/> : <></>}
-      </div>
-    );
+        {this.state.route === 'signin' ?
+          <Signin />
+          :
+          (
+            <div>
+              <Logo />
+              <Rank />
+              <ImageLinkForm onInputChange={this.onInputChange} onInputSubmit={this.onInputSubmit} />
+              <FaceRecognition boxes={this.state.boxes} image={this.state.imageUrl} />
+            </div>
+              )
+          }
+            </div>
+          );
   }
 }
 
-export default App;
+        export default App;
