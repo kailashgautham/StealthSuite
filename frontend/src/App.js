@@ -6,6 +6,7 @@ import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm'
 import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import Signin from './components/Signin/Signin';
+import Register from './components/Register/Register';
 
 class App extends Component {
   //state so that app can remember user value and update when it changes
@@ -17,6 +18,10 @@ class App extends Component {
       imageUrl: '',
       boxes: []
     };
+  }
+
+  onRouteChange = (route) => {
+    this.setState({ route: route });
   }
 
   calculateFaceLocation = (result) => {
@@ -93,24 +98,29 @@ class App extends Component {
       .catch(error => console.log('error', error));
   }
   render() {
+    const { route, imageUrl, boxes } = this.state;
     return (
       <div className="App">
-        <Navigation />
-        {this.state.route === 'signin' ?
-          <Signin />
-          :
-          (
-            <div>
-              <Logo />
-              <Rank />
-              <ImageLinkForm onInputChange={this.onInputChange} onInputSubmit={this.onInputSubmit} />
-              <FaceRecognition boxes={this.state.boxes} image={this.state.imageUrl} />
-            </div>
+        <Navigation onRouteChange={this.onRouteChange} currentRoute={route}/>
+        {
+          route === 'signin' ?
+            <Signin onRouteChange={this.onRouteChange} />
+            :
+            route === 'register' ?
+              <Register onRouteChange={this.onRouteChange} />
+              :
+              (
+                <div>
+                  <Logo />
+                  <Rank />
+                  <ImageLinkForm onInputChange={this.onInputChange} onInputSubmit={this.onInputSubmit} />
+                  <FaceRecognition boxes={boxes} image={imageUrl} />
+                </div>
               )
-          }
-            </div>
-          );
+        }
+      </div>
+    );
   }
 }
 
-        export default App;
+export default App;
