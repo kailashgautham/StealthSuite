@@ -10,7 +10,7 @@ const Navigation = ({ onRouteChange, currentRoute }) => {
             ) : currentRoute === "signin" ?
                 (
                     <nav style={{ display: "flex", justifyContent: "flex-end" }}>
-                        <p className='f3 link dim black underline pa3'>Test</p>
+                        <p className='f3 link dim black underline pa3'> </p>
                     </nav>
                 )
                 : (
