@@ -1,34 +1,72 @@
-import express from 'express';
-import fs from 'fs';
-// const app = express();
+import express from "express";
+import bodyParser from "body-parser";
 
-// //middleware to do something with the response before sending it to the actual call
-// // app.use(express.urlencoded({extended: false}));
-// // app.use(express.json());
-// app.use(express.static(process.cwd() + '/public'));
+const app = express();
+app.use(bodyParser.json());
 
-// app.listen(3000);
-fs.readFile('./script.js', (err, data) => {
-    if (err) {
-        console.log("error lmao")
+let userId = 125;
+
+let database = {
+    users: {
+        "John": {
+            id: '123',
+            name: 'John',
+            email: 'john@gmail.com',
+            password: 'cookies',
+            entries: 0,
+            joined: new Date()
+        },
+        "Sally": {
+            id: '124',
+            name: 'Sally',
+            email: 'sally@gmail.com',
+            password: 'bananas',
+            entries: 0,
+            joined: new Date()
+        }
     }
-    else {
-        console.log("1: ", data.toString('utf8'));
-    }
+}
+app.listen(3000, () => {
+    console.log('app is running on port 3000');
 })
 
-const file = fs.readFileSync('./script.js');
-console.log("2: ", file.toString());
-
-fs.appendFile('./script.js', 'I actually appended this stuff now.', err => {
-    if (err) console.log(err);
+app.get('/', (req, res) => {
+    res.send('this is working');
 });
 
-fs.writeFile('./bye.txt', 'sad to see you go', err => {
-    if (err) console.log(err);
+app.post('/signin', (req, res) => {
+    try {
+        const user = req.body.user;
+        res.json(`Welcome ${user}, you currently have ${database.users[user].entries} entries`);
+    } catch (error) {
+        res.json("user does not exist!");
+    }
 });
 
-fs.unlink('./bye.txt', err => {
-    if (err) console.log(err);
-})
+app.post('/register', (req, res) => {
+    const {user, email, password} = req.body;
+    if (user in database.users) res.json("username already exists");
+    database.users[user] = {
+        id: (userId + 1).toString(),
+        name: user,
+        email: email,
+        password: password,
+        entries: 0,
+        joined: new Date()
+    };
+    userId++;
+    res.json(database.users[user]);
+});
 
+app.get('/profile/:userId', (req, res) => {
+    const {userId}  = req.params;
+    if (!(userId in database.users)) res.json("user does not exist");
+    res.json(database.users[userId]);
+});
+
+app.put('/image', (req, res) => {
+    const {user}  = req.body;
+    if (!(user in database.users)) res.json("user does not exist");
+    database.users[user].entries++;
+    res.json(`count updated: ${user}'s count is now ${database.users[user].entries}`);
+});
