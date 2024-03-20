@@ -1,9 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
+import bcrypt from "bcrypt-nodejs";
+import cors from 'cors';
 
 const app = express();
 app.use(bodyParser.json());
-
+app.use(cors());
 let userId = 125;
 
 let database = {
@@ -31,12 +33,14 @@ app.listen(3000, () => {
 })
 
 app.get('/', (req, res) => {
-    res.send('this is working');
+    res.send(database.users);
 });
 
 app.post('/signin', (req, res) => {
     try {
         const user = req.body.user;
+        const password = req.body.password;
+        if (database.users[user].password !== password) res.json("wrong credentials");
         res.json(`Welcome ${user}, you currently have ${database.users[user].entries} entries`);
     } catch (error) {
         res.json("user does not exist!");
