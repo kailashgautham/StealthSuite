@@ -10,7 +10,7 @@ let userId = 125;
 
 let database = {
     users: {
-        "John": {
+        "john@gmail.com": {
             id: '123',
             name: 'John',
             email: 'john@gmail.com',
@@ -18,7 +18,7 @@ let database = {
             entries: 0,
             joined: new Date()
         },
-        "Sally": {
+        "sally@gmail.com": {
             id: '124',
             name: 'Sally',
             email: 'sally@gmail.com',
@@ -38,10 +38,11 @@ app.get('/', (req, res) => {
 
 app.post('/signin', (req, res) => {
     try {
-        const user = req.body.user;
+        const email = req.body.email;
+        console.log(req.body);
         const password = req.body.password;
-        if (database.users[user].password !== password) res.json("wrong credentials");
-        res.json(`Welcome ${user}, you currently have ${database.users[user].entries} entries`);
+        if (database.users[email].password !== password) res.json("wrong credentials");
+        res.json(`Welcome ${database.users[email].name}, you currently have ${database.users[email].entries} entries`);
     } catch (error) {
         res.json("user does not exist!");
     }
