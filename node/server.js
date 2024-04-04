@@ -49,18 +49,18 @@ app.post('/signin', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-    const {user, email, password} = req.body;
-    if (user in database.users) res.json("username already exists");
-    database.users[user] = {
+    const {name, email, password} = req.body;
+    if (name in database.users) res.json("username already exists");
+    database.users[name] = {
         id: (userId + 1).toString(),
-        name: user,
+        name: name,
         email: email,
         password: password,
         entries: 0,
         joined: new Date()
     };
     userId++;
-    res.json(database.users[user]);
+    res.json(database.users[name]);
 });
 
 app.get('/profile/:userId', (req, res) => {

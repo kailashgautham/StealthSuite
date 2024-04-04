@@ -16,7 +16,15 @@ class App extends Component {
       route: 'signin',
       input: '',
       imageUrl: '',
-      boxes: []
+      boxes: [],
+      isSignedIn: false,
+      user: {
+        email: '',
+        id: '',
+        name: '',
+        entries: 0,
+        joined: ''
+      }
     };
   }
 
@@ -29,6 +37,18 @@ class App extends Component {
   onRouteChange = (route) => {
     this.setState({ route: route });
   }
+
+  setUserData = (data) => {
+    this.setState({
+      user: {
+        email: data.email,
+        id: data.id,
+        name: data.name,
+        entries: data.entries,
+        joined: data.joined
+      }
+    })
+  };
 
   calculateFaceLocation = (result) => {
     let boxes = [];
@@ -105,15 +125,16 @@ class App extends Component {
   }
   render() {
     const { route, imageUrl, boxes } = this.state;
+    console.log("user: ", this.state.user)
     return (
       <div className="App">
         <Navigation onRouteChange={this.onRouteChange} currentRoute={route}/>
         {
           route === 'signin' ?
-            <Signin onRouteChange={this.onRouteChange} />
+            <Signin onRouteChange={this.onRouteChange} setUserData={this.setUserData}/>
             :
             route === 'register' ?
-              <Register onRouteChange={this.onRouteChange} />
+              <Register onRouteChange={this.onRouteChange} setUserData={this.setUserData}/>
               :
               (
                 <div>
