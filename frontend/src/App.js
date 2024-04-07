@@ -52,6 +52,7 @@ class App extends Component {
 
   calculateFaceLocation = (result) => {
     let boxes = [];
+    console.log("result: ", result)
     result.outputs[0].data.regions.forEach((region) => {
       const clarifaiFace = region.region_info.bounding_box;
       const image = document.getElementById("inputimage");
@@ -119,7 +120,22 @@ class App extends Component {
       "/outputs",
       requestOptions
     )
-      .then(response => response.json())
+      .then(response => {
+        if (response) {
+          fetch('http://localhost:3000/image', {
+            method: 'put',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
+          })
+          .then(response => response.json())
+          .then(count => {
+            this.setState({ user: { ...this.state.user, entries: count } })
+          });
+        }
+        return response.json()
+      })
       .then(result => this.displayFaceBox(this.calculateFaceLocation(result)))
       .catch(error => console.log('error', error));
   }

@@ -2,76 +2,101 @@ import express from "express";
 import bodyParser from "body-parser";
 import bcrypt from "bcrypt-nodejs";
 import cors from 'cors';
+import knex from 'knex';
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
-let userId = 125;
 
-let database = {
-    users: {
-        "john@gmail.com": {
-            id: '123',
-            name: 'John',
-            email: 'john@gmail.com',
-            password: 'cookies',
-            entries: 0,
-            joined: new Date()
-        },
-        "sally@gmail.com": {
-            id: '124',
-            name: 'Sally',
-            email: 'sally@gmail.com',
-            password: 'bananas',
-            entries: 0,
-            joined: new Date()
-        }
-    }
-}
+const db = knex({
+    client: 'pg',
+    connection: {
+      host: '127.0.0.1',
+      port: 5432,
+      user: 'kailashgautham',
+      password: '',
+      database: 'stealth-suite',
+    },
+});
+
 app.listen(3000, () => {
     console.log('app is running on port 3000');
 })
 
-app.get('/', (req, res) => {
-    res.send(database.users);
+db.select('*').from('users').then(data => {
+    console.log(data);
 });
 
-app.post('/signin', (req, res) => {
-    try {
-        const email = req.body.email;
-        console.log(req.body);
-        const password = req.body.password;
-        if (database.users[email].password !== password) res.json("wrong credentials");
-        res.json(database.users[0]);
-    } catch (error) {
-        res.json("user does not exist!");
-    }
+app.get('/', (req, res) => {
+    res.json("hello!");
 });
 
 app.post('/register', (req, res) => {
     const {name, email, password} = req.body;
-    if (name in database.users) res.json("username already exists");
-    database.users[name] = {
-        id: (userId + 1).toString(),
-        name: name,
-        email: email,
-        password: password,
-        entries: 0,
-        joined: new Date()
-    };
-    userId++;
-    res.json(database.users[name]);
+    const hash = bcrypt.hashSync(password);
+    db.transaction(trx => {
+        trx('login').insert({ hash, email })
+        .returning("email")
+        .then(loginEmail => {
+            return trx('users')
+            .returning('*')
+            .insert({
+                name,
+                email: loginEmail[0].email,
+                joined: new Date()
+            })
+            .then(user => {
+                res.json(user[0]);
+            })
+        })
+        .then(trx.commit)
+        .catch(trx.rollback)
+    })
+    .catch(err => res.status(400).json('unable to register'));
 });
 
-app.get('/profile/:userId', (req, res) => {
-    const {userId}  = req.params;
-    if (!(userId in database.users)) res.json("user does not exist");
-    res.json(database.users[userId]);
+app.post('/signin', (req, res) => {
+    const { email, password } = req.body;
+    const hash = bcrypt.hashSync(password);
+    db.transaction(trx => {
+        trx('login')
+        .select('*')
+        .where({ email })
+        .then(login => {
+            const isValid = bcrypt.compareSync(password, login[0].hash);
+            if (!isValid) return res.status(400).json('wrong credentials');
+            trx('users')
+            .select('*')
+            .where({'email': login[0].email})
+            .then(user => {
+                console.log(user)
+                res.json(user[0]);
+            })
+        })
+    })
+    .catch(err => res.status(400).json("unable to get user"));
+});
+
+app.get('/profile/:id', (req, res) => {
+    const { id }  = req.params;
+    db('users')
+    .select('*')
+    .where({ id })
+    .then(response => {
+        if (response.length) res.json(response[0]);
+        else res.json("user does not exist");
+    })
+    .catch(err => res.status(400).json('error getting user'));
 });
 
 app.put('/image', (req, res) => {
-    const {user}  = req.body;
-    if (!(user in database.users)) res.json("user does not exist");
-    database.users[user].entries++;
-    res.json(`count updated: ${user}'s count is now ${database.users[user].entries}`);
+    const { id }  = req.body;
+    db('users')
+    .where({ id })
+    .increment('entries', 1)
+    .returning('entries')
+    .then(entries => {
+        res.json(entries[0].entries);
+
+    })
 });
