@@ -35,7 +35,7 @@ class Register extends Component {
         })
         .then(response => response.json())
         .then(user => {
-            if (user)  {
+            if (user.id)  {
                 console.log(user);
                 this.props.setUserData(user);
                 this.props.onRouteChange("home");
