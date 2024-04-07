@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/StealthSuite/static/css/main.abde3d84.css",
+    "main.js": "/StealthSuite/static/js/main.9703838f.js",
+    "static/media/brain.png": "/StealthSuite/static/media/brain.90a224d2a8293eff4aeb.png",
+    "index.html": "/StealthSuite/index.html",
+    "main.abde3d84.css.map": "/StealthSuite/static/css/main.abde3d84.css.map",
+    "main.9703838f.js.map": "/StealthSuite/static/js/main.9703838f.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.abde3d84.css",
+    "static/js/main.9703838f.js"
+  ]
+}
