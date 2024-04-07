@@ -7,6 +7,7 @@ class Signin extends React.Component {
         this.state = {
           email: '',
           password: '',
+          signInError: false
         };
     }
 
@@ -19,6 +20,7 @@ class Signin extends React.Component {
     }
 
     onSubmitSignIn = () => {
+        console.log("submit sign in")
         fetch('http://localhost:3000/signin', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
@@ -34,7 +36,15 @@ class Signin extends React.Component {
                 this.props.setUserData(data)
                 this.props.onRouteChange('home');
             }
-        });
+        })
+    }
+
+    errorSignIn = () => {
+        this.setState({email: '', password: '', signInError: true})
+    }
+
+    resetSignIn = () => {
+        this.setState({email: '', password: '', signInError: false})
     }
 
     render() {
@@ -65,10 +75,10 @@ class Signin extends React.Component {
                             </div>
                         </fieldset>
                         <div className="">
-                            <input 
+                            <input
+                            onClick={this.onSubmitSignIn}
                             className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" 
-                            type="submit" value="Sign in" 
-                            onClick={this.onSubmitSignIn}/>
+                            type="submit" value="Sign in"/> 
                         </div>
                         <div className="lh-copy mt3">
                             <p className="f6 link dim black db pointer"

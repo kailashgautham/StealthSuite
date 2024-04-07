@@ -23,10 +23,6 @@ app.listen(3000, () => {
     console.log('app is running on port 3000');
 })
 
-db.select('*').from('users').then(data => {
-    console.log(data);
-});
-
 app.get('/', (req, res) => {
     res.json("hello!");
 });
@@ -56,20 +52,18 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/signin', (req, res) => {
+    console.log("entered signin")
     const { email, password } = req.body;
-    const hash = bcrypt.hashSync(password);
     db.transaction(trx => {
         trx('login')
         .select('*')
         .where({ email })
         .then(login => {
-            const isValid = bcrypt.compareSync(password, login[0].hash);
-            if (!isValid) return res.status(400).json('wrong credentials');
+            if (!login.length || !bcrypt.compareSync(password, login[0].hash)) return res.status(400).json('wrong credentials');
             trx('users')
             .select('*')
             .where({'email': login[0].email})
             .then(user => {
-                console.log(user)
                 res.json(user[0]);
             })
         })

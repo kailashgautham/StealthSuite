@@ -8,24 +8,25 @@ import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import Signin from './components/Signin/Signin';
 import Register from './components/Register/Register';
 
+const initialState = {
+  input: '',
+  imageUrl: '',
+  boxes: [],
+  route: 'signin',
+  isSignedIn: false,
+  user: {
+    email: '',
+    id: '',
+    name: '',
+    entries: 0,
+    joined: ''
+  }
+};
+
 class App extends Component {
-  //state so that app can remember user value and update when it changes
   constructor(props) {
     super(props);
-    this.state = {
-      input: '',
-      imageUrl: '',
-      boxes: [],
-      route: 'signin',
-      isSignedIn: false,
-      user: {
-        email: '',
-        id: '',
-        name: '',
-        entries: 0,
-        joined: ''
-      }
-    };
+    this.state = initialState;
   }
 
   componentDidMount() {
@@ -35,6 +36,11 @@ class App extends Component {
   }
 
   onRouteChange = (route) => {
+    if (route === 'signout') {
+      this.setState(initialState);
+    } else if (route === 'home') {
+      this.setState({ isSignedIn: true });
+    }
     this.setState({ route: route });
   }
 
@@ -77,7 +83,6 @@ class App extends Component {
   }
 
   onInputSubmit = (event) => {
-
     this.setState({ imageUrl: this.state.input });
     this.setState({ boxes: [] });
 
@@ -141,7 +146,6 @@ class App extends Component {
   }
   render() {
     const { route, imageUrl, boxes } = this.state;
-    console.log("user: ", this.state.user)
     return (
       <div className="App">
         <Navigation onRouteChange={this.onRouteChange} currentRoute={route}/>
