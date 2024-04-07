@@ -13,10 +13,10 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      route: 'signin',
       input: '',
       imageUrl: '',
       boxes: [],
+      route: 'signin',
       isSignedIn: false,
       user: {
         email: '',
@@ -139,7 +139,7 @@ class App extends Component {
               (
                 <div>
                   <Logo />
-                  <Rank />
+                  <Rank userName={this.state.user.name} userEntries={this.state.user.entries}/>
                   <ImageLinkForm onInputChange={this.onInputChange} onInputSubmit={this.onInputSubmit} />
                   <FaceRecognition boxes={boxes} image={imageUrl} />
                 </div>

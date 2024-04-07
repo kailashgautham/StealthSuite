@@ -42,7 +42,7 @@ app.post('/signin', (req, res) => {
         console.log(req.body);
         const password = req.body.password;
         if (database.users[email].password !== password) res.json("wrong credentials");
-        res.json(`Welcome ${database.users[email].name}, you currently have ${database.users[email].entries} entries`);
+        res.json(database.users[0]);
     } catch (error) {
         res.json("user does not exist!");
     }
